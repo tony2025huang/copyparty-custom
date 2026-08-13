@@ -1,0 +1,55 @@
+# Phase-one secure reverse-proxy template for copyparty.
+# Run copyparty only on loopback (for example: -i 127.0.0.1) or a Unix socket.
+# Put this server block inside an http {} context after adapting TLS paths,
+# server_name, upstream, and client_max_body_size.
+
+log_format copyparty_json escape=json
+  '{"time":"$time_iso8601","remote_addr":"$remote_addr",'
+  '"request":"$request","status":$status,"bytes_sent":$body_bytes_sent,'
+  '"request_time":$request_time,"upstream_response_time":"$upstream_response_time",'
+  '"user_agent":"$http_user_agent"}';
+access_log /var/log/nginx/copyparty-access.jsonl copyparty_json;
+
+upstream copyparty_backend {
+    server 127.0.0.1:3923;
+    keepalive 8;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name files.example.invalid;
+
+    # ssl_certificate /etc/letsencrypt/live/files.example.invalid/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/files.example.invalid/privkey.pem;
+
+    # Set a deliberate business limit; this is intentionally not a default.
+    client_max_body_size <SET_MAX_UPLOAD_SIZE>;  # e.g. 20G
+    client_body_timeout 610m;
+    client_header_timeout 610m;
+    send_timeout 610m;
+
+    location / {
+        proxy_pass http://copyparty_backend;
+        proxy_http_version 1.1;
+        proxy_redirect off;
+        proxy_buffering off;
+        proxy_request_buffering off;
+        proxy_read_timeout 610m;
+        proxy_send_timeout 610m;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+
+        # Trust incoming Forwarded/X-Forwarded-* only when this nginx is the
+        # public edge.  If another CDN/LB precedes nginx, restrict nginx to
+        # that provider's published source ranges and use its verified client
+        # IP header; otherwise clients can spoof identity/audit fields.
+    }
+}
+
+# Nginx access_log records requests, including downloads. copyparty hook audit
+# records only events passed to its hooks, so retain and protect this JSONL log.

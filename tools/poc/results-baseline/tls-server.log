@@ -1,0 +1,58 @@
+
+[SFX]    this is: copyparty 1.20.20
+[SFX]  packed at: 2026-08-03, 22:33:25 UTC, 1785796405
+[SFX] archive is: /root/.openclaw/workspace/.tmp/openclaw-spikes/copyparty/copyparty-sfx.py
+[SFX] python bin: /usr/bin/python3
+[SFX] python ver: CPython 3.12.3 (main, Jun 19 2026, 12:46:00) [GCC 13.3.0]
+
+[SFX] found early
+[SFX] jinja2: 3.1.2
+[SFX] pyftpd: bundled
+[SFX] sfxdir: /tmp/pe-copyparty.0.373614.0
+
+copyparty v1.20.20 "sftp is fine too" (2026-08-03)
+  CPython v3.12.3 on Linux64  [GCC 13.3.0]
+   sqlite 3.45.1*1 | jinja 3.1.2 | pyftpd 1.5.10 | tftp 0.4.0 | miko (None)
+
+2026-08-12
+19:22:36.177 root                   LOG: opening sessions-db /root/.config/copyparty/sessions.db
+19:22:36.178 root                  WARN: the sessions-db [/root/.config/copyparty/sessions.db] is already in use by another copyparty instance (pid:373905). This is not supported; please provide another database with --ses-db or give this copyparty-instance its entirely separate config-folder by setting another path in the XDG_CONFIG_HOME env-var. You can also disable this safeguard by setting env-var PRTY_NO_DB_LOCK=1. Will now disable sessions and instead use plaintext passwords in cookies.
+19:22:36.180 auth                   LOG: volumes and permissions:
+
+"/public"  /root/.openclaw/workspace/.tmp/openclaw-spikes/copyparty/data/public
+|    read:  alice
+|   write:  alice
+|    move:  alice
+|  delete:  alice
+|    dots:  alice
+|     get:  alice
+|   upGet:  --none--
+|    html:  --none--
+|  uadmin:  alice
+
+19:22:36.180 auth                   BTW: hint: enable searching and upload-undo with argument -e2dsa
+19:22:36.180 auth                   BTW: hint: enable upload deduplication with --dedup (but see readme for consequences)
+19:22:36.184 root                   LOG: max clients: 1024
+19:22:36.184 tcpsrv                 LOG: available @ https://127.0.0.1:43828/  (0-local only)
+
+19:22:36.186 optional-dependencies  BTW: OK: sqlite, NG: pillow, vips, pillow-webp, ffmpeg, ffprobe, bwrap, mutagen, argon2, pyzmq, pillow-heif, pillow-avif, rawpy, libraw, see --deps (this is fine btw)
+19:22:36.186 thumb                  LOG: decoder preference: (None available)
+19:22:36.186 thumb                 WARN: need either Pillow, pyvips, or FFmpeg to create thumbnails; for example:
+                                     python3 -m pip install --user Pillow
+                                     python3 -m pip install --user pyvips
+                                     apt install ffmpeg
+19:22:36.186 thumb                  BTW: setting --no-acode because either FFmpeg or FFprobe is not available
+19:22:36.470 tcpsrv                 LOG: listening @ 127.0.0.1:43828  f3 p373978
+19:22:36.470 hsrv                   LOG: subscribed @ 127.0.0.1:43828  f3 p373978
+19:22:36.470 root                   LOG: workers OK
+
+19:22:36.471 up2k                   LOG: /public/ casechk:n fsnt:lin
+19:22:36.471 up2k                   LOG: 0 volumes in 0.00 sec
+19:22:37.694 127.0.0.1 55802        LOG: TLS_AES_256_GCM_SHA384 TLSv1.3 256
+19:22:37.694 127.0.0.1 55802        LOG: GET  /public/ @alice
+OPYTHAT
+19:22:37.752 hsrv                   LOG: ok bye
+19:22:37.752 tcpsrv                 LOG: ok bye
+19:22:37.752 up2k                   LOG: writing snapshot
+19:22:37.752 root                   LOG: nailed it
+[0m

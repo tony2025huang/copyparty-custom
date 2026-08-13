@@ -157,7 +157,7 @@ function up2k_flagbus() {
 function U2pvis(act, btns, uc, st) {
     var r = this;
     r.act = act;
-    r.ctr = { "ok": 0, "ng": 0, "bz": 0, "q": 0 };
+    r.ctr = { "ok": 0, "ng": 0, "bz": 0, "q": 0, "rm": 0 };
     r.tab = [];
     r.hq = {};
     r.head = 0;
@@ -346,7 +346,7 @@ function U2pvis(act, btns, uc, st) {
         r.ctr[oldcat]--;
         r.ctr[newcat]++;
 
-        while (st.car < r.tab.length && has(['ok', 'ng'], r.tab[st.car].in))
+        while (st.car < r.tab.length && has(['ok', 'ng', 'rm'], r.tab[st.car].in))
             st.car++;
 
         r.drawcard(oldcat);
@@ -586,6 +586,13 @@ function U2pvis(act, btns, uc, st) {
                 td + 't">' + (markup[row.ht] || row.ht) +
                 td + 'p" class="prog">' + row.hp + '</td>';
 
+        // Failed/cancelled uploads are terminal until the user explicitly acts.
+        // Do not render controls for a merely retrying task in the busy card.
+        if (row.in == 'ng' && st.files[nfile].terminal)
+            ret += '<td class="u2actions"><a href="#" act="retry" data-nfile="' + nfile + '">' +
+                (L.u_retry || Ls.eng.u_retry) + '</a> <a href="#" act="remove" data-nfile="' + nfile + '">' +
+                (L.u_remove || Ls.eng.u_remove) + '</a></td>';
+
         if (as_html)
             return '<tr id="f' + nfile + '">' + ret + '</tr>';
 
@@ -597,6 +604,20 @@ function U2pvis(act, btns, uc, st) {
     r.addrow = function (nfile) {
         var tr = r.genrow(nfile);
         ebi('u2tab').tBodies[0].appendChild(tr);
+    };
+
+    r.remove = function (nfile) {
+        var row = r.tab[nfile], oldcat = row.in;
+        if (oldcat == 'rm')
+            return;
+
+        row.in = 'rm';
+        r.ctr[oldcat]--;
+        r.ctr.rm++;
+        while (st.car < r.tab.length && has(['ok', 'ng', 'rm'], r.tab[st.car].in))
+            st.car++;
+        r.drawcard(oldcat);
+        qsr('#f' + nfile);
     };
 
     btns = QSA(btns + '>a[act]');
@@ -1006,12 +1027,148 @@ function up2k_init(subtle) {
                 arr.splice(a, 1);
     }
 
+    // Keep the original low-level unqueue_up() semantics: it is used by
+    // automatic recovery paths.  User actions deliberately go through these
+    // higher-level helpers instead.
+    function drop_from(arr, t, nfile) {
+        for (var a = arr.length - 1; a >= 0; a--)
+            if (arr[a] === t || (nfile !== undefined && arr[a].nfile == nfile))
+                arr.splice(a, 1);
+    }
+
+    function track_xhr(t, xhr) {
+        (t.xhrs || (t.xhrs = [])).push(xhr);
+        return xhr;
+    }
+
+    function untrack_xhr(t, xhr) {
+        if (t.xhrs)
+            apop(t.xhrs, xhr);
+    }
+
+    // Every asynchronous operation captures this value before it starts.
+    // Advancing it invalidates FileReader, digest, worker and XHR callbacks
+    // belonging to an earlier attempt.
+    function task_live(t, generation) {
+        return !!t && !t.removed && !t.terminal && !t.done &&
+            t.generation === generation;
+    }
+
+    function mark_terminal(t, why) {
+        if (t.removed || t.terminal)
+            return;
+        t.generation = (t.generation || 0) + 1;
+        t.terminal = why || 'failed';
+        // A terminal task must not remain runnable while its action buttons
+        // are visible; automatic retries use other paths and never call this.
+        drop_from(st.todo.head, t);
+        drop_from(st.todo.hash, t);
+        drop_from(st.todo.handshake, t);
+        drop_from(st.todo.upload, t, t.n);
+        drop_from(st.busy.head, t);
+        drop_from(st.busy.hash, t);
+        drop_from(st.busy.handshake, t);
+        drop_from(st.busy.upload, t, t.n);
+        t.postlist = [];
+        if (!t.terminal_counted) {
+            st.bytes.finished += t.size;
+            t.terminal_counted = true;
+        }
+        pvis.move(t.n, 'ng');
+    }
+
+    function abort_task_requests(t) {
+        var xhrs = (t.xhrs || []).slice();
+        t.xhrs = [];
+        for (var a = 0; a < xhrs.length; a++) {
+            var xhr = xhrs[a];
+            if (xhr.bsent) {
+                st.bytes.inflight -= xhr.bsent;
+                xhr.bsent = 0;
+            }
+            try { xhr.abort(); } catch (ex) { }
+        }
+        if (t.abort_controller) {
+            try { t.abort_controller.abort(); } catch (ex) { }
+            t.abort_controller = null;
+        }
+        if (t.retry_timer) {
+            clearTimeout(t.retry_timer);
+            t.retry_timer = null;
+        }
+        if (st.bytes.inflight < 0)
+            st.bytes.inflight = 0;
+    }
+
+    function retry_terminal(t) {
+        if (!t || !t.terminal || t.removed || t.done)
+            return false;
+        if (!t.hash.length && !t.fobj)
+            return false;
+
+        t.terminal = null;
+        t.generation = (t.generation || 0) + 1;
+        t.cooldown = t.coolmul = 0;
+        t.want_recheck = false;
+        if (t.terminal_counted) {
+            st.bytes.finished = Math.max(0, st.bytes.finished - t.size);
+            t.terminal_counted = false;
+        }
+        // The handshake asks the server for its missing hashes, so existing
+        // wark/chunk progress is retained and completed chunks are not resent.
+        if (t.hash && t.hash.length)
+            push_t(st.todo.handshake, t);
+        else
+            push_t(st.todo.hash, t);
+        pvis.move(t.n, 'q');
+        tasker();
+        return true;
+    }
+
+    function remove_terminal(t) {
+        if (!t || !t.terminal || t.removed || t.done)
+            return false;
+
+        t.removed = true;
+        t.generation = (t.generation || 0) + 1;
+        abort_task_requests(t);
+        drop_from(st.todo.head, t);
+        drop_from(st.todo.hash, t);
+        drop_from(st.todo.handshake, t);
+        drop_from(st.todo.upload, t, t.n);
+        drop_from(st.busy.head, t);
+        drop_from(st.busy.hash, t);
+        drop_from(st.busy.handshake, t);
+        drop_from(st.busy.upload, t, t.n);
+        t.postlist = [];
+        if (t.terminal_counted)
+            st.bytes.finished = Math.max(0, st.bytes.finished - t.size);
+        st.bytes.total = Math.max(0, st.bytes.total - t.size);
+        t.fobj = null;
+        pvis.remove(t.n);
+        tasker();
+        return true;
+    }
+
     var pvis = new U2pvis("bz", '#u2cards', uc, st),
         donut = new Donut(uc, st);
 
     r.ui = pvis;
     r.st = st;
     r.uc = uc;
+    r.retry_upload = function (nfile) { return retry_terminal(st.files[nfile]); };
+    r.remove_upload = function (nfile) { return remove_terminal(st.files[nfile]); };
+    ebi('u2tab').onclick = function (e) {
+        var o = e.target, act = o && o.getAttribute('act');
+        if (act != 'retry' && act != 'remove')
+            return;
+        ev(e);
+        var nfile = parseInt(o.getAttribute('data-nfile'));
+        if (act == 'retry')
+            retry_terminal(st.files[nfile]);
+        else
+            remove_terminal(st.files[nfile]);
+    };
 
     if (!window.File || !window.FileReader || !window.FileList || !File.prototype || !File.prototype.slice)
         return un2k(L.u_ever);
@@ -1862,7 +2019,7 @@ function up2k_init(subtle) {
                     }
                     for (var a = 0; a < nf; a++) {
                         var t = st.files[a];
-                        if (t.want_recheck) {
+                        if (t.want_recheck && !t.removed && !t.terminal && !t.done) {
                             t.rechecks++;
                             t.want_recheck = false;
                             push_t(st.todo.handshake, t);
@@ -2119,10 +2276,13 @@ function up2k_init(subtle) {
 
     function exec_hash() {
         var t = st.todo.hash.shift();
+        if (!t || t.removed || t.terminal || t.done)
+            return;
         if (!t.size)
             return st.todo.handshake.push(t);
 
         st.busy.hash.push(t);
+        var generation = t.generation || 0;
         st.nfile.hash = t.n;
         t.t_hashing = Date.now();
 
@@ -2149,6 +2309,8 @@ function up2k_init(subtle) {
             return wexec_hash(t, chunksize, nchunks);
 
         var segm_next = function () {
+            if (!task_live(t, generation))
+                return false;
             if (nchunk >= nchunks || bpend)
                 return false;
 
@@ -2195,6 +2357,8 @@ function up2k_init(subtle) {
             }
 
             var orz = function (e) {
+                if (!task_live(t, generation))
+                    return;
                 bpend = 0;
                 var buf = e.target.result;
                 if (fr_cdr > cdr) {
@@ -2212,6 +2376,8 @@ function up2k_init(subtle) {
                 try { orz(e); } catch (ex) { vis_exh(ex + '', 'up2k.js', '', '', ex); }
             };
             reader.onerror = function () {
+                if (!task_live(t, generation))
+                    return;
                 var err = esc('' + reader.error),
                     handled = false;
 
@@ -2226,9 +2392,7 @@ function up2k_init(subtle) {
                 }
 
                 if (handled) {
-                    pvis.move(t.n, 'ng');
-                    apop(st.busy.hash, t);
-                    st.bytes.finished += t.size;
+                    mark_terminal(t, 'failed');
                     return;
                 }
 
@@ -2242,8 +2406,12 @@ function up2k_init(subtle) {
         };
 
         var hash_calc = function (nch, buf) {
+            if (!task_live(t, generation))
+                return;
             hashers++;
             var orz = function (hashbuf) {
+                if (!task_live(t, generation))
+                    return;
                 var hslice = new Uint8Array(hashbuf).subarray(0, 33),
                     b64str = buf2b64(hslice);
 
@@ -2292,7 +2460,8 @@ function up2k_init(subtle) {
     }
 
     function wexec_hash(t, chunksize, nchunks) {
-        var nchunk = 0,
+        var generation = t.generation || 0,
+            nchunk = 0,
             reading = 0,
             max_readers = 1,
             opt_readers = 2,
@@ -2330,6 +2499,8 @@ function up2k_init(subtle) {
         }
 
         function go_next() {
+            if (!task_live(t, generation))
+                return;
             if (st.slow_io && uc.multitask)
                 // android-chrome filereader latency is ridiculous but scales linearly
                 // (unlike every other platform which instead suffers on parallel reads...)
@@ -2357,7 +2528,6 @@ function up2k_init(subtle) {
             if (nbusy)
                 return;
             apop(st.busy.hash, t);
-            st.bytes.finished += t.size;
         }
 
         function onmsg(d) {
@@ -2375,6 +2545,9 @@ function up2k_init(subtle) {
                     go_next();
                 }
 
+            if (!task_live(t, generation))
+                return;
+
             if (k == "panic")
                 return vis_exh(d[1], 'up2k.js', '', '', d[1]);
 
@@ -2391,7 +2564,7 @@ function up2k_init(subtle) {
                 if (d[1] == 'OS-error')
                     got_oserr();
 
-                pvis.move(t.n, 'ng');
+                mark_terminal(t, 'failed');
                 return go_fail();
             }
 
@@ -2455,13 +2628,17 @@ function up2k_init(subtle) {
 
     function exec_head() {
         var t = st.todo.head.shift();
-        if (t.done)
-            return console.log('done; skip head1', t.name, t);
+        if (!t || t.removed || t.terminal || t.done)
+            return console.log('done; skip head1', t && t.name, t);
 
         st.busy.head.push(t);
+        var generation = t.generation || 0;
 
-        var xhr = new XMLHttpRequest();
+        var xhr = track_xhr(t, new XMLHttpRequest());
         xhr.onerror = xhr.ontimeout = function () {
+            untrack_xhr(t, xhr);
+            if (!task_live(t, generation))
+                return;
             console.log('head onerror, retrying', t.name, t);
             if (!toast.visible)
                 toast.warn(9.98, L.u_enethd + "\n\nfile: " + esc(t.name), t);
@@ -2470,6 +2647,9 @@ function up2k_init(subtle) {
             st.todo.head.unshift(t);
         };
         function orz(e) {
+            untrack_xhr(t, xhr);
+            if (!task_live(t, generation))
+                return;
             if (t.done)
                 return console.log('done; skip head2', t.name, t);
 
@@ -2516,13 +2696,15 @@ function up2k_init(subtle) {
     //
 
     function exec_handshake() {
-        var t = st.todo.handshake.shift(),
-            keepalive = t.keepalive,
+        var t = st.todo.handshake.shift();
+        if (!t || t.removed || t.terminal || t.done)
+            return console.log('done; skip hs', t && t.name, t);
+
+        var keepalive = t.keepalive,
             me = Date.now();
 
         while (apop(st.todo.handshake, t));
-        if (t.done)
-            return console.log('done; skip hs', t.name, t);
+        var generation = t.generation || 0;
 
         st.busy.handshake.push(t);
         t.keepalive = undefined;
@@ -2534,8 +2716,11 @@ function up2k_init(subtle) {
         if (!t.srch && !t.t_handshake)
             pvis.seth(t.n, 2, L.u_hs);
 
-        var xhr = new XMLHttpRequest();
+        var xhr = track_xhr(t, new XMLHttpRequest());
         xhr.onerror = xhr.ontimeout = function () {
+            untrack_xhr(t, xhr);
+            if (!task_live(t, generation))
+                return;
             if (t.t_busied != me)  // t.done ok
                 return console.log('zombie handshake onerror', t.name, t);
 
@@ -2548,6 +2733,9 @@ function up2k_init(subtle) {
             t.keepalive = keepalive;
         };
         var orz = function (e) {
+            untrack_xhr(t, xhr);
+            if (!task_live(t, generation))
+                return;
             if (t.t_busied != me || t.done)
                 return console.log('zombie handshake onload', t.name, t);
 
@@ -2599,11 +2787,18 @@ function up2k_init(subtle) {
                     }
                     pvis.seth(t.n, 2, msg);
                     pvis.seth(t.n, 1, smsg);
-                    pvis.move(t.n, smsg == '404' ? 'ng' : 'ok');
+                    if (smsg == '404') {
+                        mark_terminal(t, 'failed');
+                        t.done = false;
+                    }
+                    else
+                        pvis.move(t.n, 'ok');
                     apop(st.busy.handshake, t);
-                    st.bytes.finished += t.size;
-                    t.done = true;
-                    t.fobj = null;
+                    if (smsg != '404')
+                        st.bytes.finished += t.size;
+                    t.done = smsg != '404';
+                    if (t.done)
+                        t.fobj = null;
                     tasker();
                     return;
                 }
@@ -2784,12 +2979,9 @@ function up2k_init(subtle) {
                 }
 
                 if (err != "") {
-                    if (!t.t_uploading)
-                        st.bytes.finished += t.size;
-
                     pvis.seth(t.n, 1, cls);
                     pvis.seth(t.n, 2, err);
-                    pvis.move(t.n, 'ng');
+                    mark_terminal(t, 'failed');
 
                     tasker();
                     return;
@@ -2874,17 +3066,20 @@ function up2k_init(subtle) {
     }
 
     function exec_upload() {
-        var upt = st.todo.upload.shift(),
-            t = st.files[upt.nfile],
+        var upt = st.todo.upload.shift();
+        if (!upt)
+            return;
+        var t = st.files[upt.nfile],
             nparts = upt.nparts,
             pcar = nparts[0],
             pcdr = nparts[nparts.length - 1],
             maxsz = (u2sz_max > 1 ? u2sz_max : 2040) * 1024 * 1024;
 
-        if (t.done)
-            return console.log('done; skip chunk', t.name, t);
+        if (!t || t.removed || t.terminal || t.done)
+            return console.log('done; skip chunk', t && t.name, t);
 
         st.busy.upload.push(upt);
+        upt.generation = t.generation || 0;
         st.nfile.upload = upt.nfile;
 
         if (!t.t_uploading)
@@ -2924,6 +3119,8 @@ function up2k_init(subtle) {
                 pcar == pcdr ? pcar : ('' + pcar + '~' + pcdr);
 
         var orz = function (xhr) {
+            if (!task_live(t, upt.generation))
+                return;
             st.bytes.inflight -= xhr.bsent;
             var txt = unpre((xhr.response && xhr.response.err) || xhr.responseText);
             if (txt.indexOf('upload blocked by x') + 1) {
@@ -2931,7 +3128,7 @@ function up2k_init(subtle) {
                 unqueue_up(t);
                 pvis.seth(t.n, 1, "ERROR");
                 pvis.seth(t.n, 2, txt.split(/\n/)[0]);
-                pvis.move(t.n, 'ng');
+                mark_terminal(t, 'failed');
                 return;
             }
             if (xhr.status == 200) {
@@ -2971,6 +3168,8 @@ function up2k_init(subtle) {
             orz2(xhr);
         }
         var orz2 = function (xhr) {
+            if (!task_live(t, upt.generation))
+                return;
             apop(st.busy.upload, upt);
             for (var a = pcar; a <= pcdr; a++)
                 apop(t.postlist, a);
@@ -2984,11 +3183,13 @@ function up2k_init(subtle) {
             tasker();
         }
         function do_send() {
-            var xhr = new XMLHttpRequest(),
+            var xhr = track_xhr(t, new XMLHttpRequest()),
                 bfin = Math.floor(st.bytes.finished / 1024 / 1024),
                 btot = Math.floor(st.bytes.total / 1024 / 1024);
 
             xhr.upload.onprogress = function (xev) {
+                if (!task_live(t, upt.generation))
+                    return;
                 var nb = xev.loaded,
                     db = nb - xhr.bsent;
 
@@ -3002,9 +3203,15 @@ function up2k_init(subtle) {
                 pvis.prog(t, pcar, nb);
             };
             xhr.onload = function (xev) {
+                untrack_xhr(t, xhr);
+                if (!task_live(t, upt.generation))
+                    return;
                 try { orz(xhr); } catch (ex) { vis_exh(ex + '', 'up2k.js', '', '', ex); }
             };
             xhr.onerror = xhr.ontimeout = function (xev) {
+                untrack_xhr(t, xhr);
+                if (!task_live(t, upt.generation))
+                    return;
                 if (crashed)
                     return;
 

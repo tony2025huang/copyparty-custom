@@ -1,0 +1,7 @@
+# acct: alice
+# perms: ['read', 'write', 'move', 'delete', 'dot', 'get', 'admin']
+# srvinf: moltbot // 61.0 GiB free of 96.1 GiB
+[0;7;36m[7m2026[27m0812[0;1m19[0;36m16[0m03[0;35m  4.0K[0m [94m测试 folder/
+[0;7;36m[7m2026[27m0812[0;1m19[0;36m21[0m42[0;36m   30B[0m renamed-target.txt
+[0;7;36m[7m2026[27m0812[0;1m19[0;36m22[0m15[0;31m 3.00M[0m up2k-resume.bin
+[0m

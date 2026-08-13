@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+Content-Length: 389
+Connection: Keep-Alive
+Date: Wed, 12 Aug 2026 19:22:37 GMT
+Cache-Control: no-store, max-age=0
+Set-Cookie: cppws=alicepw; Path=/; Expires=Thu, 15 Jul 2027 17:22:37 GMT; Secure; HttpOnly; SameSite=Strict
+Content-Type: text/plain; charset=utf-8
+X-Content-Type-Options: nosniff
+Vary: Origin, PW, Cookie
+Content-Security-Policy: script-src 'unsafe-eval' 'nonce-P+USeLOcR0O4Wth+f7ChMA=='; worker-src 'self'

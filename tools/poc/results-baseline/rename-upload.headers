@@ -1,0 +1,11 @@
+HTTP/1.1 201 Created
+Content-Length: 153
+Connection: Keep-Alive
+Date: Wed, 12 Aug 2026 19:21:42 GMT
+Cache-Control: no-store, max-age=0
+Set-Cookie: cppwd=dlCijFNfiUNKTw5fSAFSJEse; Path=/; Expires=Thu, 15 Jul 2027 17:21:42 GMT; HttpOnly; SameSite=Strict
+Location: http://127.0.0.1:43827/public/rename-source.txt
+Content-Type: text/plain; charset=utf-8
+X-Content-Type-Options: nosniff
+Vary: Origin, PW, Cookie
+Content-Security-Policy: script-src 'unsafe-eval' 'nonce-KlSPWK3hKSnHj68Hs/yxdw=='; worker-src 'self'
