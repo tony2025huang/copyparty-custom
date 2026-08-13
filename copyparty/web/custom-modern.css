@@ -1,0 +1,295 @@
+/*
+ * SafeFileHub-inspired SaaS shell for copyparty.
+ * Loaded from copyparty's own /.cpr/w/ asset route; no third-party assets.
+ * The browser's existing theme classes remain authoritative: `*y` is light,
+ * while `*z` is dark.  This file intentionally overrides presentation only.
+ */
+:root {
+	color-scheme: light;
+	--sf-bg: #f4f8ff;
+	--sf-surface: #ffffff;
+	--sf-surface-raised: #ffffff;
+	--sf-text: #14213d;
+	--sf-muted: #64748b;
+	--sf-line: #dbe7f5;
+	--sf-line-strong: #c7d8ed;
+	--sf-primary: #1677e8;
+	--sf-primary-hover: #0e63cc;
+	--sf-primary-soft: #eaf3ff;
+	--sf-success: #12805c;
+	--sf-warning: #ae6500;
+	--sf-danger: #c6384a;
+	--sf-shadow: 0 12px 32px rgba(25, 75, 135, .10);
+	--sf-radius: 12px;
+	--sf-radius-sm: 8px;
+
+	/* Feed the native browser CSS too, retaining its full theme behavior. */
+	--fg: var(--sf-text);
+	--fg-max: #0d1b35;
+	--fg-weak: var(--sf-muted);
+	--bg: var(--sf-surface);
+	--bgg: var(--sf-bg);
+	--bg-u1: #fbfdff;
+	--bg-u2: var(--sf-surface);
+	--bg-u3: #f8fbff;
+	--bg-u4: #f1f6fc;
+	--bg-u5: var(--sf-line-strong);
+	--bg-u6: #b9cde3;
+	--bg-d1: #edf5ff;
+	--bg-d2: #e5effa;
+	--bg-d3: #d8e8f8;
+	--bg-max: #ffffff;
+	--row-alt: #f8fbff;
+	--a: var(--sf-primary);
+	--a-b: #80b5f0;
+	--a-hil: var(--sf-primary-hover);
+	--a-dark: var(--sf-danger);
+	--a-gray: #91a4bb;
+	--sel-fg: #fff;
+	--sel-bg: var(--sf-primary);
+	--btn-fg: #285171;
+	--btn-bg: #f7fbff;
+	--btn-h-fg: #0c5fc6;
+	--btn-h-bg: #e9f3ff;
+	--btn-1-fg: #fff;
+	--btn-1-bg: var(--sf-primary);
+	--btn-1h-fg: #fff;
+	--btn-1h-bg: var(--sf-primary-hover);
+	--txt-bg: #fff;
+	--txt-sh: transparent;
+	--tree-bg: var(--sf-surface);
+	--u2-btn-b1: #76afe9;
+	--u2-sbtn-b1: #76afe9;
+	--u2-txt-bg: #fff;
+	--u2-tab-bg: #f7fbff;
+	--u2-tab-b1: var(--sf-line-strong);
+	--u2-tab-1-fg: var(--sf-primary);
+	--u2-tab-1-bg: #fff;
+	--u2-tab-1-b1: #8dbfec;
+	--u2-tab-1-b2: #8dbfec;
+	--u2-tab-1-sh: rgba(22, 119, 232, .15);
+	--u2-b-fg: #fff;
+	--u2-b1-bg: var(--sf-primary);
+	--u2-b2-bg: #387fca;
+	--u2-inf-bg: #1677e8;
+	--u2-inf-b1: #87c0fa;
+	--u2-ok-bg: #12805c;
+	--u2-ok-b1: #72d4b1;
+	--u2-err-bg: #c6384a;
+	--u2-err-b1: #f3a7b1;
+	--g-sel-bg: #1677e8;
+	--g-fsel-bg: #2585eb;
+	--g-fg: var(--sf-primary);
+	--g-bg: #fff;
+	--g-b1: var(--sf-line);
+	--g-b2: var(--sf-line);
+	--g-g1: #fff;
+	--g-g2: #edf5ff;
+	--g-f-bg: #f8fbff;
+	--g-f-b1: var(--sf-line);
+	--g-sh: rgba(25, 75, 135, .10);
+}
+
+/* copyparty light themes end in y; preserve the selected family, modernize it. */
+html.y { color-scheme: light; }
+
+/* copyparty dark themes end in z; the palette is dark by explicit user choice. */
+html.z {
+	color-scheme: dark;
+	--sf-bg: #101827;
+	--sf-surface: #172235;
+	--sf-surface-raised: #1d2b40;
+	--sf-text: #e6eef9;
+	--sf-muted: #9db0c9;
+	--sf-line: #2b3c54;
+	--sf-line-strong: #40536d;
+	--sf-primary: #60a5fa;
+	--sf-primary-hover: #93c5fd;
+	--sf-primary-soft: #172e4d;
+	--sf-success: #4fd1a5;
+	--sf-warning: #f6bd60;
+	--sf-danger: #fb8d9b;
+	--sf-shadow: 0 14px 34px rgba(0, 0, 0, .30);
+	--fg: var(--sf-text);
+	--fg-max: #fff;
+	--fg-weak: var(--sf-muted);
+	--bg: var(--sf-surface);
+	--bgg: var(--sf-bg);
+	--bg-u1: #1b2940;
+	--bg-u2: var(--sf-surface);
+	--bg-u3: #1a283d;
+	--bg-u4: #203049;
+	--bg-u5: var(--sf-line-strong);
+	--bg-u6: #526782;
+	--bg-d1: #1e3049;
+	--bg-d2: #172235;
+	--bg-d3: #101827;
+	--bg-max: #0d1522;
+	--row-alt: #142035;
+	--a: var(--sf-primary);
+	--a-b: #4b82bb;
+	--a-hil: var(--sf-primary-hover);
+	--a-dark: var(--sf-danger);
+	--btn-fg: #c7d9ee;
+	--btn-bg: #1d2b40;
+	--btn-h-fg: #fff;
+	--btn-h-bg: #263b58;
+	--btn-1-fg: #0d1b2d;
+	--btn-1-bg: var(--sf-primary);
+	--btn-1h-fg: #081321;
+	--btn-1h-bg: var(--sf-primary-hover);
+	--txt-bg: #172235;
+	--tree-bg: var(--sf-surface);
+	--u2-txt-bg: #172235;
+	--u2-tab-bg: #172235;
+	--u2-tab-1-fg: var(--sf-primary);
+	--u2-tab-1-bg: #1d2b40;
+	--g-bg: #172235;
+	--g-b1: var(--sf-line);
+	--g-b2: var(--sf-line);
+	--g-g1: #172235;
+	--g-g2: #203049;
+	--g-f-bg: #1d2b40;
+	--g-f-b1: var(--sf-line);
+}
+
+html, body { background: var(--sf-bg); }
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+body, input, select, textarea, button { letter-spacing: .005em; }
+a { color: var(--sf-primary); }
+a:hover { color: var(--sf-primary-hover); }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--sf-primary) 45%, transparent); outline-offset: 2px; }
+
+/* Native dialogs, contextual menu, notification surfaces, and form controls. */
+#toast, #tt, #rcm, .opbox, #widgeti, #u2conf, #u2tabw, #wrap > table,
+#ht_spl #wrap, #ht_shr #wrap, #ht_rup #wrap, #ht_idp #wrap, #ht_svc #wrap {
+	border: 1px solid var(--sf-line);
+	box-shadow: var(--sf-shadow);
+	border-radius: var(--sf-radius);
+}
+#toast, #tt, #rcm { color: var(--sf-text); background: var(--sf-surface-raised); text-shadow: none; }
+#toast { border-left-width: 4px; }
+#toast.inf { background: var(--sf-surface-raised); border-color: var(--sf-primary); }
+#toast.ok { background: var(--sf-surface-raised); border-color: var(--sf-success); }
+#toast.warn { background: var(--sf-surface-raised); border-color: var(--sf-warning); }
+#toast.err { background: var(--sf-surface-raised); border-color: var(--sf-danger); }
+#toast a { color: inherit; background: var(--sf-primary-soft); }
+#rcm > a:hover { background: var(--sf-primary-soft); }
+
+input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea,
+#op_up2k input, #op_search input {
+	color: var(--sf-text);
+	background: var(--sf-surface-raised);
+	border: 1px solid var(--sf-line-strong);
+	border-radius: var(--sf-radius-sm);
+	box-shadow: none;
+}
+input:not([type=checkbox]):not([type=radio]):not([type=file]):focus, select:focus, textarea:focus {
+	border-color: var(--sf-primary);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-primary) 17%, transparent);
+}
+input[type=submit], input[type=button], button, .btn, #u2cards a, #u2btn, #blogout {
+	border: 1px solid var(--sf-line-strong);
+	border-radius: var(--sf-radius-sm);
+	box-shadow: none;
+	transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+input[type=submit], input[type=button], button.primary, .btn.primary {
+	color: var(--btn-1-fg);
+	background: var(--btn-1-bg);
+	border-color: var(--btn-1-bg);
+}
+input[type=submit]:hover, input[type=button]:hover, button:hover, .btn:hover, #u2cards a:hover, #u2btn:hover {
+	transform: translateY(-1px);
+	border-color: var(--sf-primary);
+}
+
+/* Browser: a quiet application bar, breadcrumb and dense-but-airy file rows. */
+#ops {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	min-height: 3.4em;
+	padding: .45em max(1em, calc((100vw - 88em) / 2));
+	box-sizing: border-box;
+	background: color-mix(in srgb, var(--sf-surface) 90%, transparent);
+	border-bottom: 1px solid var(--sf-line);
+	backdrop-filter: blur(14px);
+}
+#ops a { border-radius: var(--sf-radius-sm); }
+#ops a.act { color: var(--btn-1-fg); background: var(--btn-1-bg); }
+#path {
+	margin: 1.2em max(1rem, calc((100vw - 84em) / 2)) .7em;
+	padding: .45em .65em;
+	color: var(--sf-text);
+	background: var(--sf-surface);
+	border: 1px solid var(--sf-line);
+	border-radius: var(--sf-radius);
+	box-shadow: 0 2px 6px rgba(25, 75, 135, .04);
+	text-shadow: none;
+}
+#path a { color: var(--sf-muted); border-radius: 6px; }
+#path a:last-child { color: var(--sf-text); font-weight: 650; }
+#path a:hover { color: var(--sf-primary); background: var(--sf-primary-soft); }
+#wrap { max-width: 84em; margin-left: auto; margin-right: auto; padding: 0 1rem 3rem; box-sizing: border-box; }
+#tree { border-right: 1px solid var(--sf-line); background: var(--sf-surface); }
+#tree ul a { border-radius: 6px; }
+#tree ul a.sel, #tree ul a:hover { color: var(--sf-primary); background: var(--sf-primary-soft); }
+#files { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
+#files thead th { color: var(--sf-muted); background: transparent; border-bottom: 1px solid var(--sf-line); font-size: .82em; font-weight: 650; letter-spacing: .035em; text-transform: uppercase; }
+#files td { background: var(--sf-surface); border-top: 1px solid var(--sf-line); border-bottom: 1px solid var(--sf-line); }
+#files td:first-child { border-left: 1px solid var(--sf-line); border-radius: var(--sf-radius-sm) 0 0 var(--sf-radius-sm); }
+#files td:last-child { border-right: 1px solid var(--sf-line); border-radius: 0 var(--sf-radius-sm) var(--sf-radius-sm) 0; }
+#files tr:nth-child(2n) td { background: var(--sf-surface); }
+#files tbody tr:hover td, #files tbody tr:hover td + td { background: var(--sf-primary-soft); box-shadow: none; border-color: color-mix(in srgb, var(--sf-primary) 34%, var(--sf-line)); }
+#files tbody a { color: var(--sf-text); }
+#files tbody a:hover { color: var(--sf-primary); background: transparent; text-decoration: none; }
+#files tr.sel td, #files tr.sel:hover td { background: var(--sf-primary-soft); }
+
+/* Grid cards and upload task cards retain native interaction/state classes. */
+#files .grid, #files.grid, .grid .file, .grid .fcard { border-radius: var(--sf-radius); }
+#op_up2k { background: transparent; }
+#u2btn { color: var(--sf-primary); background: var(--sf-primary-soft); border: 2px dashed var(--u2-btn-b1); border-radius: var(--sf-radius); }
+#u2btn:hover { background: color-mix(in srgb, var(--sf-primary) 16%, var(--sf-surface)); }
+#u2tabw { background: var(--sf-surface); padding: .75em; }
+#u2tab { border-radius: var(--sf-radius-sm); overflow: hidden; }
+#u2tab td { background: var(--sf-surface); border-color: var(--sf-line); }
+#u2tab tbody tr:hover td { background: var(--sf-primary-soft); }
+#u2cards a { color: var(--sf-muted); background: var(--sf-surface); }
+#u2cards a.act { color: var(--sf-primary); background: var(--sf-primary-soft); border-color: var(--sf-primary); box-shadow: none; }
+
+/* Splash, login, shares, recent uploads, services, markdown and message helpers. */
+#ht_spl #wrap, #ht_shr #wrap, #ht_rup #wrap, #ht_idp #wrap, #ht_svc #wrap {
+	background: var(--sf-surface);
+	padding: clamp(1rem, 3vw, 2rem);
+}
+#ht_spl h1, #ht_svc h1 { color: var(--sf-text); border-color: var(--sf-line); }
+#ht_spl a, #ht_svc a { color: var(--sf-primary); background: var(--sf-primary-soft); border: 1px solid color-mix(in srgb, var(--sf-primary) 20%, var(--sf-line)); border-radius: var(--sf-radius-sm); }
+#ht_spl #lf { padding: 1rem; background: var(--sf-primary-soft); border: 1px solid var(--sf-line); border-radius: var(--sf-radius); }
+#ht_spl #ls { color: var(--btn-1-fg); background: var(--btn-1-bg); border-color: var(--btn-1-bg); }
+#ht_shr #tab, #ht_idp #tab, #ht_rup table, #ht_spl .vols { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; border: 1px solid var(--sf-line); border-radius: var(--sf-radius-sm); }
+#ht_shr th, #ht_idp th, #ht_rup th, #ht_spl .vols th { color: var(--sf-muted); background: var(--sf-primary-soft); }
+#ht_shr td, #ht_idp td, #ht_rup td, #ht_spl .vols td { border-color: var(--sf-line); }
+#ht_md #mh, #ht_mde #mn { background: var(--sf-surface); border-color: var(--sf-line); box-shadow: 0 2px 10px rgba(25, 75, 135, .06); }
+#ht_msg #box { color: var(--sf-text) !important; background: var(--sf-surface) !important; }
+#ht_msg a { color: var(--sf-primary) !important; }
+
+@media (max-width: 48em) {
+	#ops { min-height: 3em; padding-inline: .6rem; overflow-x: auto; white-space: nowrap; }
+	#path { margin: .75rem .6rem .5rem; font-size: 1.08em; overflow-x: auto; white-space: nowrap; max-width: none; }
+	#wrap { padding-inline: .6rem; }
+	#files { border-spacing: 0 3px; font-size: .92em; }
+	#files td, #files thead th { padding-left: .35em; padding-right: .35em; }
+	#files td:nth-child(n+4), #files th:nth-child(n+4) { display: none; }
+	#u2tabw { padding: .35rem; overflow-x: auto; }
+	#u2tab { min-width: 34rem; width: 100%; }
+	#u2cards { min-width: 0; overflow-x: auto; text-align: left; }
+	#u2btn { width: auto; max-width: none; margin-inline: 0; }
+	#ht_spl #wrap, #ht_shr #wrap, #ht_rup #wrap, #ht_idp #wrap, #ht_svc #wrap { margin: .75rem .5rem; padding: 1rem; }
+	#ht_shr #wrap, #ht_idp #wrap, #ht_rup #wrap { overflow-x: auto; }
+	#toast { right: .65rem; bottom: 1rem; max-width: calc(100% - 2rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
