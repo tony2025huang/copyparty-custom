@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="ht_mde">
+<html lang="{{ 'zh-CN' if lang == 'chi' else 'en' }}" id="ht_mde">
 
 <head>
 	<meta charset="utf-8">
@@ -19,7 +19,7 @@
 		<div id="mn"></div>
 		<div id="ml">
 			<div style="text-align:center;margin:5em 0">
-				<div style="font-size:2em;margin:1em 0">Loading</div>
+				<div style="font-size:2em;margin:1em 0" data-i18n="loading">Loading</div>
 				if you're still reading this, check that javascript is allowed
 			</div>
 		</div>
@@ -49,7 +49,8 @@ try { l.light = drk? 0:1; } catch (ex) { }
 })();
 
 	</script>
-	<script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/util.js?_={{ ts }}"></script>
+<script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/util.js?_={{ ts }}"></script>
+<script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/i18n.js?_={{ ts }}"></script>
 	<script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/deps/marked.js?_={{ ts }}"></script>
 	<script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/deps/easymde.js?_={{ ts }}"></script>
 	<script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/mde.js?_={{ ts }}"></script>
@@ -62,4 +63,3 @@ try { l.light = drk? 0:1; } catch (ex) { }
 		jsldp("J_MDE","mde");
 	</script>
 </body></html>
-

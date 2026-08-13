@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="ht_msg">
+<html lang="{{ 'zh-CN' if lang == 'chi' else 'en' }}" id="ht_msg">
 
 <head>
 	<meta charset="utf-8">
@@ -14,6 +14,7 @@ html{touch-action:manipulation;background:#333}
 #box{padding:.5em 1em;background:#2c2c2c}
 a{color:#fc5}</style>
 {{ html_head }}
+	<script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/i18n.js?_={{ ts }}"></script>
 </head>
 
 <body>
@@ -57,4 +58,3 @@ a{color:#fc5}</style>
 </body>
 
 </html>
-

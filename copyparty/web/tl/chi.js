@@ -676,6 +676,9 @@ Ls.chi = {
 	"rc_shs": "共享选中项",
 
 	"lang_set": "刷新以使更改生效？",
+	"u_retry": "重试",
+	"u_remove": "移除",
+	"u_cancelled": "已取消",
 
 	"splash": {
 		"a1": "刷新",

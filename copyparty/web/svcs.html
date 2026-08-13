@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="ht_svc">
+<html lang="{{ 'zh-CN' if lang == 'chi' else 'en' }}" id="ht_svc">
 
 <head>
 	<meta charset="utf-8">
@@ -16,8 +16,8 @@
 <body>
 	<div id="wrap" class="w">
         <div class="cn">
-            <p class="btns"><a href="/{{ rvp }}">browse files</a> // <a href="{{ r }}/?h">control panel</a></p>
-            <p>or choose your OS for cooler alternatives:</p>
+			<p class="btns"><a href="/{{ rvp }}" data-i18n="browse_files">browse files</a> // <a href="{{ r }}/?h" data-i18n="control_panel">control panel</a></p>
+            <p data-i18n="choose_os">or choose your OS for cooler alternatives:</p>
             <div class="ossel">
                 <a id="swin" href="#">Windows</a>
                 <a id="slin" href="#">Linux</a>
@@ -29,15 +29,15 @@
             make this server appear on your computer as a regular HDD!<br />
             pick your favorite below (sorted by performance, best first) and lets 🎉<br />
             <br />
-            <span class="os win lin mac">placeholders:</span>
+            <span class="os win lin mac" data-i18n="placeholders">placeholders:</span>
             <span class="os win">
                 {% if accs %}{% if un %}<code><b id="un0">{{ un }}</b></code>=username, <code><b id="up0">{{ unpw }}</b></code>=username:password, {% endif %}<code><b id="pw0">{{ pw }}</b></code>=password, {% endif %}<code><b>W:</b></code>=mountpoint
             </span>
             <span class="os lin mac">
                 {% if accs %}{% if un %}<code><b id="un0">{{ un }}</b></code>=username, <code><b id="up0">{{ unpw }}</b></code>=username:password, {% endif %}<code><b id="pw0">{{ pw }}</b></code>=password, {% endif %}<code><b>mp</b></code>=mountpoint
             </span>
-            {% if accs %}<a href="#" id="setpw">use real password</a>{% endif %}
-            <a href="#" id="qr">show qr</a>
+			{% if accs %}<a href="#" id="setpw" data-i18n="use_password">use real password</a>{% endif %}
+			<a href="#" id="qr" data-i18n="show_qr">show qr</a>
         </p>
 
 
@@ -359,6 +359,7 @@ document.documentElement.className = (STG && STG.cpp_thm) || "{{ args.theme }}";
 
 </script>
 <script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/util.js?_={{ ts }}"></script>
+<script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/i18n.js?_={{ ts }}"></script>
 <script nonce="{{ js_nonce }}" src="{{ r }}/.cpr/w/svcs.js?_={{ ts }}"></script>
 {%- if js %}
 <script nonce="{{ js_nonce }}" src="{{ js }}_={{ ts }}"></script>
@@ -370,4 +371,3 @@ document.documentElement.className = (STG && STG.cpp_thm) || "{{ args.theme }}";
 </script>
 </body>
 </html>
-

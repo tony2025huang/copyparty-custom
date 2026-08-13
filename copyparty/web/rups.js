@@ -3,10 +3,10 @@
 var J_RUP = 1;
 
 function render() {
-    var html = ['<table id="tab"><thead><tr><th>size</th><th>who</th><th>ip</th><th>when</th><th>age</th><th>dir</th><th>file</th></tr></thead><tbody>'];
+    var html = ['<table id="tab"><thead><tr><th>' + I18N.t('size') + '</th><th>' + I18N.t('who') + '</th><th>ip</th><th>' + I18N.t('when') + '</th><th>' + I18N.t('age') + '</th><th>' + I18N.t('directory') + '</th><th>' + I18N.t('file') + '</th></tr></thead><tbody>'];
     var ups = V.ups, now = V.now;
     ebi('filter').value = V.filter;
-    ebi('hits').innerHTML = 'showing ' + ups.length + ' files';
+    ebi('hits').textContent = I18N.tf('showing_files', {n: ups.length});
 
     for (var a = 0; a < ups.length; a++) {
         var f = ups[a],
@@ -29,8 +29,8 @@ function render() {
             '</a></td></tr>');
     }
     if (!ups.length) {
-        var t = V.filter ? ' matching the filter' : '';
-        html = ['<tr><td colspan="6">there are no uploads' + t + '</td></tr>'];
+        var t = V.filter ? I18N.t('matching_filter') : '';
+        html = ['<tr><td colspan="7">' + I18N.t('no_uploads') + t + '</td></tr>'];
     }
     html.push('</tbody></table>');
     ebi('tw').innerHTML = html.join('\n');
@@ -41,7 +41,7 @@ var ti;
 function ask(e) {
     ev(e);
     clearTimeout(ti);
-    ebi('hits').innerHTML = 'Loading...';
+    ebi('hits').textContent = I18N.t('loading') + '...';
 
     var xhr = new XHR(),
         filter = unsmart(ebi('filter').value);

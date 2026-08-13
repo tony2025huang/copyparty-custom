@@ -713,6 +713,15 @@ var LANGN = [
 	["vie", "Tiếng Việt"],
 ];
 
+// Chinese is the custom build default.  A cplng cookie (including cplng=eng)
+// remains authoritative, so the language chooser and shared auxiliary pages
+// use the same preference chain.
+function cplang(fallback) {
+	var m = /(?:^|;\s*)cplng=([^;]+)/.exec(document.cookie || '');
+	return m ? decodeURIComponent(m[1]) : fallback;
+}
+lang = cplang(lang || 'chi');
+
 if (window.langmod)
 	langmod();
 
@@ -725,7 +734,7 @@ if (window.glang && navigator.languages && !/\bcplng=/.test(document.cookie))
 		var lmap = [
 			["eng", /^en/i],
 			["nor", /^n[ob]/i],
-			["chi", /^zh-cn/i],
+			["chi", /^zh(?:$|[-_])/i],
 			["cze", /^cs/i],
 			["deu", /^de/i],
 			["epo", /^eo/i],

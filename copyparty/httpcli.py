@@ -337,11 +337,15 @@ class HttpCli(object):
             alg, salt, fspath, fsize, inode, self.log, self.args.log_fk
         )
 
+    def ui_lang(self) -> str:
+        """Return the UI language selected by the preference cookie or server default."""
+        return self.cookies.get("cplng") or self.args.lang
+
     def j2s(self, name: str, **ka: Any) -> str:
         tpl = self.conn.hsrv.j2[name]
         ka["r"] = self.args.SR if self.is_vproxied else ""
         ka["ts"] = self.conn.hsrv.cachebuster()
-        ka["lang"] = self.cookies.get("cplng") or self.args.lang
+        ka["lang"] = self.ui_lang()
         ka["favico"] = self.args.favico
         ka["s_doctitle"] = self.args.doctitle
         ka["tcolor"] = self.vn.flags["tcolor"]
@@ -5637,7 +5641,7 @@ class HttpCli(object):
             "edit": "edit" in self.uparam,
             "title": html_escape(self.vpath, crlf=True),
             "lastmod": int(ts_md * 1000),
-            "lang": self.cookies.get("cplng") or self.args.lang,
+            "lang": self.ui_lang(),
             "favico": self.args.favico,
             "md": boundary,
             "arg_base": arg_base,
